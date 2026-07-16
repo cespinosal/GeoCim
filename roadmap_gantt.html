@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>GeoCim — Roadmap (Gantt)</title>
+<style>
+  :root{
+    --ink:#1b2330;--ink-soft:#5a6675;--ink-faint:#8a95a4;
+    --line:#d4dae3;--paper:#f4f6f9;--white:#fff;
+    --blue:#1f6fd6;--mono:'IBM Plex Mono',Consolas,monospace;--sans:'IBM Plex Sans',Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);background:var(--paper);color:var(--ink);padding:20px}
+  h1{font-size:17px;margin-bottom:4px}
+  .sub{font-size:12px;color:var(--ink-faint);margin-bottom:16px}
+  .controls{display:flex;gap:18px;align-items:flex-end;background:var(--white);border:1px solid var(--line);border-radius:9px;padding:14px 18px;margin-bottom:16px;flex-wrap:wrap}
+  .ctl{display:flex;flex-direction:column;gap:5px}
+  .ctl label{font-size:11px;color:var(--ink-soft);font-weight:600;text-transform:uppercase;letter-spacing:.02em}
+  .ctl input{font-family:var(--mono);font-size:13px;padding:7px 9px;border:1px solid var(--line);border-radius:6px;outline:none;width:150px}
+  .ctl input:focus{border-color:var(--blue)}
+  .summary{display:flex;gap:22px;flex-wrap:wrap;margin-left:auto}
+  .sitem{text-align:right}
+  .sitem .v{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--ink)}
+  .sitem .l{font-size:10.5px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.02em}
+  .gantt-wrap{background:var(--white);border:1px solid var(--line);border-radius:9px;overflow:auto;max-height:78vh}
+  .gantt{position:relative;display:flex}
+  .labels{flex-shrink:0;width:300px;position:sticky;left:0;background:var(--white);z-index:3;border-right:1px solid var(--line)}
+  .labels .hd{height:46px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 12px;font-size:10.5px;font-weight:700;color:var(--ink-faint);text-transform:uppercase}
+  .lrow{height:28px;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 12px;font-size:11.5px;border-bottom:1px solid #eef1f6;white-space:nowrap}
+  .lrow .nm{overflow:hidden;text-overflow:ellipsis;flex:1;display:flex;align-items:center;gap:7px;min-width:0}
+  .lrow .nm .txt{overflow:hidden;text-overflow:ellipsis}
+  .lrow .hrs{font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);flex-shrink:0}
+  .lrow.phase{background:var(--paper);font-weight:700;font-size:11px;color:var(--ink)}
+  .lrow.phase .hrs{color:var(--ink-soft);font-weight:700}
+  .lrow.buffer .txt{font-style:italic;color:var(--ink-faint)}
+  .lrow.done .txt{text-decoration:line-through;color:var(--ink-faint)}
+  .chk{width:14px;height:14px;min-width:14px;border:1.5px solid var(--line);border-radius:3px;cursor:pointer;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;background:var(--white)}
+  .chk.checked{background:#1e9e63;border-color:#1e9e63}
+  .chk.checked::after{content:'✓';color:#fff;font-size:9px;font-weight:bold}
+  .timeline{position:relative}
+  .thead{height:46px;position:sticky;top:0;background:var(--white);z-index:2;border-bottom:1px solid var(--line)}
+  .month-row{height:22px;position:relative;border-bottom:1px solid #eef1f6}
+  .month-lbl{position:absolute;top:0;height:22px;display:flex;align-items:center;padding-left:5px;font-size:10.5px;font-weight:700;color:var(--ink-soft);border-left:1px solid var(--line)}
+  .day-row{height:24px;position:relative}
+  .day-cell{position:absolute;top:0;height:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:8.5px;color:var(--ink-faint);line-height:1}
+  .day-cell b{font-size:9.5px;color:var(--ink-soft)}
+  .day-cell.off{background:rgba(138,149,164,0.10)}
+  .day-cell.off b{color:#c2cad6}
+  .body{position:relative}
+  .bg-off{position:absolute;top:0;background:rgba(138,149,164,0.08);z-index:0}
+  .phase-row-bg{position:absolute;left:0;right:0;background:var(--paper);z-index:0}
+  .bar{position:absolute;border-radius:4px;display:flex;align-items:center;padding:0 7px;font-size:10px;color:#fff;font-family:var(--mono);font-weight:600;overflow:hidden;white-space:nowrap;box-shadow:0 1px 2px rgba(0,0,0,.15);z-index:1}
+  .bar-dur{position:absolute;display:flex;align-items:center;font-size:10px;color:var(--ink-faint);font-family:var(--mono);white-space:nowrap;z-index:1}
+  .today-line{position:absolute;top:0;width:2px;background:#d4453b;z-index:2;opacity:.7}
+  .legend{display:flex;gap:14px;margin-top:12px;flex-wrap:wrap}
+  .lg-it{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-soft)}
+  .lg-sw{width:11px;height:11px;border-radius:3px}
+</style>
+</head>
+<body>
+<h1>GeoCim — Roadmap de implementación</h1>
+<div class="sub">Diagrama de Gantt · excluye fines de semana y días festivos oficiales de México · marca cada tarea conforme la completes</div>
+
+<div class="controls">
+  <div class="ctl">
+    <label>Fecha de inicio</label>
+    <input type="date" id="startDate">
+  </div>
+  <div class="ctl">
+    <label>Horas por día</label>
+    <input type="number" id="hoursDay" min="0.5" max="6" step="0.5" value="2">
+    <span style="font-size:10px;color:var(--ink-faint);max-width:170px">Tope de 6 h/día — por restricción de contexto/tokens de Claude por sesión</span>
+  </div>
+  <div class="summary" id="summary"></div>
+</div>
+
+<div class="gantt-wrap"><div class="gantt" id="gantt"></div></div>
+
+<div class="legend" id="legend"></div>
+
+<script>
+const PHASES=[
+  {name:'Fase 0 — Retirar Losa', color:'#8a95a4', tasks:[
+    {name:'Retirar módulo Losa', hours:1.8},
+    {name:'Imprevistos / cambios menores', hours:0.3, buffer:true},
+  ]},
+  {name:'Fase 1 — Pilotes', color:'#d98a1f', tasks:[
+    {name:'P-M aplicado al pilote', hours:1.3},
+    {name:'Memoria de cálculo', hours:1.8},
+    {name:'Curvas p-y', hours:5.0},
+    {name:'Solver BNWF', hours:8.5},
+    {name:'Visualización y(z), M(z), V(z)', hours:3.5},
+    {name:'Integración UI/frames', hours:2.3},
+    {name:'Imprevistos / cambios menores', hours:3.4, buffer:true},
+  ]},
+  {name:'Fase 2 — Grupo de pilotes', color:'#7a5cb8', tasks:[
+    {name:'Scaffold del módulo', hours:3.0},
+    {name:'Geometría del grupo + planta', hours:3.7},
+    {name:'Eficiencia de grupo', hours:1.3},
+    {name:'Distribución de carga por pilote', hours:2.5},
+    {name:'Asentamiento de grupo', hours:2.5},
+    {name:'Diseño del cabezal', hours:5.0},
+    {name:'Memoria de cálculo', hours:1.8},
+    {name:'Imprevistos / cambios menores', hours:3.2, buffer:true},
+  ]},
+  {name:'Fase 3 — Zapata aislada', color:'#1f6fd6', tasks:[
+    {name:'Memoria de cálculo — componente base', hours:3.5},
+    {name:'Aplicar memoria a checks existentes', hours:3.6},
+    {name:'Diagrama P-M — cálculo', hours:3.8},
+    {name:'Visualización diagrama + punto de demanda', hours:3.5},
+    {name:'Integración P-M en pedestal', hours:1.3},
+    {name:'Zapata combinada', hours:3.5},
+    {name:'Presión biaxial', hours:2.4},
+    {name:'Volcamiento/deslizamiento', hours:2.4},
+    {name:'Refactor — función reutilizable', hours:2.4},
+    {name:'Selector de tipo de uso (5 tipos)', hours:3.0},
+    {name:'Geometría 3 piernas', hours:3.6},
+    {name:'Geometría 4 piernas', hours:2.4},
+    {name:'Geometría monopolo', hours:1.8},
+    {name:'Geometría embebida en pedestal', hours:2.4},
+    {name:'Distribución de carga global → pierna', hours:3.7},
+    {name:'Invocar motor por pierna', hours:1.8},
+    {name:'Extracción por pierna', hours:2.5},
+    {name:'Vuelco general del sistema', hours:3.7},
+    {name:'Trabe — toggle + geometría', hours:2.4},
+    {name:'Trabe — diseño estructural', hours:3.7},
+    {name:'Trabe — vista planta + 3D', hours:2.4},
+    {name:'Trabe — integración vuelco/redistribución', hours:3.1},
+    {name:'Trabe — memoria de cálculo', hours:1.2},
+    {name:'Imprevistos / cambios menores', hours:10.1, buffer:true},
+  ]},
+  {name:'Fase 4 — Torre Telco', color:'#1e9e63', tasks:[
+    {name:'Modelo de datos — selector 3/4 dados', hours:1.8},
+    {name:'Geometría en planta (4 dados)', hours:1.2},
+    {name:'Geometría en corte (4 dados)', hours:1.8},
+    {name:'Geometría 3D (4 dados)', hours:1.2},
+    {name:'Checks estructurales del mat (4 dados)', hours:2.5},
+    {name:'Memoria de cálculo', hours:1.8},
+    {name:'Imprevistos / cambios menores', hours:1.7, buffer:true},
+  ]},
+];
+
+const STORAGE_KEY='geocim_gantt_done_v1';
+function loadDone(){ try{ return JSON.parse(localStorage.getItem(STORAGE_KEY))||{}; }catch(e){ return {}; } }
+function saveDone(d){ localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
+let DONE=loadDone();
+
+const MESES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const DIAS=['D','L','M','M','J','V','S'];
+
+function nthWeekday(year,month,weekday,n){
+  const d=new Date(year,month,1); let c=0;
+  while(true){ if(d.getDay()===weekday){ c++; if(c===n) return new Date(d); } d.setDate(d.getDate()+1); }
+}
+function holidaySet(years){
+  const s=new Set();
+  const key=d=>`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+  years.forEach(y=>{
+    s.add(key(new Date(y,0,1)));                 // Año Nuevo
+    s.add(key(nthWeekday(y,1,1,1)));              // Día de la Constitución (1er lunes feb)
+    s.add(key(nthWeekday(y,2,1,3)));              // Natalicio de Juárez (3er lunes mar)
+    s.add(key(new Date(y,4,1)));                  // Día del Trabajo
+    s.add(key(new Date(y,8,16)));                 // Independencia
+    s.add(key(nthWeekday(y,10,1,3)));             // Revolución (3er lunes nov)
+    if((y-2024)%6===0) s.add(key(new Date(y,11,1))); // Transmisión del Ejecutivo (cada 6 años)
+    s.add(key(new Date(y,11,25)));                // Navidad
+  });
+  return s;
+}
+let HOLIDAYS=null;
+function isHoliday(d){ return HOLIDAYS.has(`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`); }
+function isWorkday(d){ const w=d.getDay(); return w!==0 && w!==6 && !isHoliday(d); }
+function addDays(d,n){ const r=new Date(d); r.setDate(r.getDate()+n); return r; }
+function fmt(d){ return `${String(d.getDate()).padStart(2,'0')}/${MESES[d.getMonth()].slice(0,3)}/${d.getFullYear()}`; }
+
+function scheduleAll(startDate,hoursPerDay){
+  const years=[startDate.getFullYear()-1,startDate.getFullYear(),startDate.getFullYear()+1,startDate.getFullYear()+2];
+  HOLIDAYS=holidaySet(years);
+  let cursor=new Date(startDate);
+  while(!isWorkday(cursor)) cursor=addDays(cursor,1);
+  const out=[];
+  PHASES.forEach(phase=>{
+    const ph={...phase,tasks:[]};
+    phase.tasks.forEach(t=>{
+      // cada tarea arranca con el día completo disponible; el remanente de un día
+      // ya "tocado" por una tarea no se reutiliza para iniciar la siguiente.
+      let remain=hoursPerDay;
+      let left=t.hours;
+      const start=new Date(cursor);
+      while(true){
+        const consume=Math.min(remain,left);
+        remain-=consume; left-=consume;
+        if(left<=1e-9){
+          ph.tasks.push({...t,start,end:new Date(cursor)});
+          cursor=addDays(cursor,1); while(!isWorkday(cursor)) cursor=addDays(cursor,1);
+          break;
+        }
+        cursor=addDays(cursor,1); while(!isWorkday(cursor)) cursor=addDays(cursor,1); remain=hoursPerDay;
+      }
+    });
+    out.push(ph);
+  });
+  return out;
+}
+
+const DAY_W=20, ROW_H=28, HEAD_H=46;
+
+function render(){
+  const startInput=document.getElementById('startDate').value;
+  const hoursPerDay=parseFloat(document.getElementById('hoursDay').value)||4;
+  let startDate=startInput?new Date(startInput+'T00:00:00'):new Date();
+
+  const scheduled=scheduleAll(startDate,hoursPerDay);
+  const allTasks=scheduled.flatMap(p=>p.tasks);
+  const firstDate=allTasks[0].start;
+  const lastDate=allTasks[allTasks.length-1].end;
+  const totalDays=Math.round((lastDate-firstDate)/86400000)+1;
+  const totalHours=allTasks.reduce((a,t)=>a+t.hours,0);
+
+  // rows: phase header + tasks (con key estable para el checkbox)
+  let rows=[];
+  scheduled.forEach((p,pi)=>{
+    const phaseHours=p.tasks.reduce((a,t)=>a+t.hours,0);
+    rows.push({type:'phase',name:p.name,color:p.color,hours:phaseHours});
+    p.tasks.forEach((t,ti)=>rows.push({type:'task',...t,color:p.color,key:`${pi}_${ti}`}));
+  });
+
+  const doneCount=rows.filter(r=>r.type==='task'&&DONE[r.key]).length;
+  const taskCount=rows.filter(r=>r.type==='task').length;
+
+  // summary
+  let workdays=0; for(let i=0;i<totalDays;i++){ if(isWorkday(addDays(firstDate,i))) workdays++; }
+  document.getElementById('summary').innerHTML=`
+    <div class="sitem"><div class="v">${fmt(firstDate)}</div><div class="l">Inicio real</div></div>
+    <div class="sitem"><div class="v">${fmt(lastDate)}</div><div class="l">Término estimado</div></div>
+    <div class="sitem"><div class="v">${totalHours.toFixed(1)} h</div><div class="l">Total horas</div></div>
+    <div class="sitem"><div class="v">${workdays}</div><div class="l">Días laborables</div></div>
+    <div class="sitem"><div class="v">${doneCount}/${taskCount}</div><div class="l">Tareas completadas</div></div>
+  `;
+
+  const ganttEl=document.getElementById('gantt');
+  const timelineW=totalDays*DAY_W;
+  const bodyH=rows.length*ROW_H;
+
+  // labels column
+  let labelsHtml=`<div class="hd"><span>Tarea</span><span>Horas</span></div>`;
+  rows.forEach(r=>{
+    if(r.type==='phase'){
+      labelsHtml+=`<div class="lrow phase" style="border-left:4px solid ${r.color}"><span class="nm"><span class="txt">${r.name}</span></span><span class="hrs">${r.hours.toFixed(1)} h</span></div>`;
+    } else {
+      const isDone=!!DONE[r.key];
+      labelsHtml+=`<div class="lrow ${r.buffer?'buffer':''} ${isDone?'done':''}" title="${r.name}">
+        <span class="nm"><span class="chk ${isDone?'checked':''}" data-key="${r.key}"></span><span class="txt">${r.name}</span></span>
+        <span class="hrs">${r.hours.toFixed(1)} h</span>
+      </div>`;
+    }
+  });
+
+  // month header
+  let monthHtml='', dayHtml='', cursorIdx=0;
+  while(cursorIdx<totalDays){
+    const d=addDays(firstDate,cursorIdx);
+    const m=d.getMonth(), y=d.getFullYear();
+    let span=0;
+    while(cursorIdx+span<totalDays){
+      const dd=addDays(firstDate,cursorIdx+span);
+      if(dd.getMonth()!==m||dd.getFullYear()!==y) break;
+      span++;
+    }
+    monthHtml+=`<div class="month-lbl" style="left:${cursorIdx*DAY_W}px;width:${span*DAY_W}px">${MESES[m]} ${y}</div>`;
+    cursorIdx+=span;
+  }
+  for(let i=0;i<totalDays;i++){
+    const d=addDays(firstDate,i);
+    const off=!isWorkday(d);
+    dayHtml+=`<div class="day-cell ${off?'off':''}" style="left:${i*DAY_W}px;width:${DAY_W}px">${DIAS[d.getDay()]}<b>${d.getDate()}</b></div>`;
+  }
+
+  // background off-day stripes + phase row backgrounds
+  let bgHtml='';
+  for(let i=0;i<totalDays;i++){
+    const d=addDays(firstDate,i);
+    if(!isWorkday(d)) bgHtml+=`<div class="bg-off" style="left:${i*DAY_W}px;width:${DAY_W}px;height:${bodyH}px"></div>`;
+  }
+  rows.forEach((r,idx)=>{
+    if(r.type==='phase') bgHtml+=`<div class="phase-row-bg" style="top:${idx*ROW_H}px;height:${ROW_H}px"></div>`;
+  });
+
+  // bars
+  let barsHtml='';
+  rows.forEach((r,idx)=>{
+    if(r.type!=='task') return;
+    const startIdx=Math.round((r.start-firstDate)/86400000);
+    const span=Math.round((r.end-r.start)/86400000)+1;
+    const left=startIdx*DAY_W+1, width=span*DAY_W-2;
+    const isDone=!!DONE[r.key];
+    const barStyle=isDone
+      ? `background:#1e9e63`
+      : (r.buffer?`background:repeating-linear-gradient(45deg,${r.color} 0 5px,#ffffff55 5px 10px);opacity:.85`:`background:${r.color}`);
+    barsHtml+=`<div class="bar" style="left:${left}px;top:${idx*ROW_H+4}px;width:${width}px;height:${ROW_H-8}px;${barStyle}" title="${r.name} · ${r.hours}h · ${fmt(r.start)}–${fmt(r.end)}">${r.hours}h</div>`;
+    barsHtml+=`<div class="bar-dur" style="left:${left+width+8}px;top:${idx*ROW_H+4}px;height:${ROW_H-8}px">${span} ${span===1?'día':'días'}</div>`;
+  });
+
+  // today line
+  const today=new Date(); today.setHours(0,0,0,0);
+  let todayHtml='';
+  if(today>=firstDate && today<=lastDate){
+    const idx=Math.round((today-firstDate)/86400000);
+    todayHtml=`<div class="today-line" style="left:${idx*DAY_W+DAY_W/2}px;height:${HEAD_H+bodyH}px"></div>`;
+  }
+
+  ganttEl.innerHTML=`
+    <div class="labels">${labelsHtml}</div>
+    <div class="timeline" style="width:${timelineW}px">
+      <div class="thead" style="width:${timelineW}px">
+        <div class="month-row" style="width:${timelineW}px">${monthHtml}</div>
+        <div class="day-row" style="width:${timelineW}px">${dayHtml}</div>
+      </div>
+      <div class="body" style="width:${timelineW}px;height:${bodyH}px">${bgHtml}${barsHtml}${todayHtml}</div>
+    </div>
+  `;
+
+  document.querySelectorAll('.chk').forEach(el=>{
+    el.onclick=(e)=>{
+      e.stopPropagation();
+      const k=el.dataset.key;
+      DONE[k]=!DONE[k];
+      saveDone(DONE);
+      render();
+    };
+  });
+
+  // legend
+  document.getElementById('legend').innerHTML=PHASES.map(p=>{
+    const tot=p.tasks.reduce((a,t)=>a+t.hours,0);
+    return `<div class="lg-it"><span class="lg-sw" style="background:${p.color}"></span>${p.name} · ${tot.toFixed(1)} h</div>`;
+  }).join('');
+}
+
+const t0=new Date(); t0.setDate(t0.getDate()+1);
+document.getElementById('startDate').value=t0.toISOString().slice(0,10);
+document.getElementById('startDate').addEventListener('input',render);
+document.getElementById('hoursDay').addEventListener('input',render);
+render();
+</script>
+</body>
+</html>

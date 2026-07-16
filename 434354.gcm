@@ -1,0 +1,220 @@
+{
+  "version": "1.0",
+  "state": {
+    "module": "zapata",
+    "currentFrame": {
+      "zapata": 3,
+      "pilote": 0,
+      "losa": 0,
+      "torre": 0
+    },
+    "modDone": {
+      "zapata": true,
+      "pilote": false,
+      "losa": false,
+      "torre": false
+    },
+    "frameStatus": {
+      "zapata": [
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "pilote": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "losa": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "torre": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    "proyecto": {
+      "nombre": "434354",
+      "ingeniero": "Ing Juan Espinosa",
+      "fecha": "2026-06-11",
+      "ubicacion": "Paraguay",
+      "norma": "ACI 318"
+    },
+    "config": {
+      "metodo": "meyerhof",
+      "nf": 4,
+      "unidades": "MKS"
+    },
+    "materiales": {
+      "fc": 20.59388851841682,
+      "fy": 411.87777036833637,
+      "recub": 0.05,
+      "fcLosa": 20.59388851841682,
+      "fyLosa": 411.87777036833637,
+      "fcPed": 20.59388851841682,
+      "fyPed": 411.87777036833637
+    },
+    "zapata": {
+      "B": 4.5,
+      "L": 4.5,
+      "Df": 3,
+      "N": 490.34029616553886,
+      "M": 333.43140139256644,
+      "FS": 3,
+      "shape": "cuadrada"
+    },
+    "pilote": {
+      "D": 0,
+      "Lp": 0,
+      "N": 0,
+      "type": "hincado",
+      "FS": 0
+    },
+    "torre": {
+      "Ba": 0,
+      "Bb": 0,
+      "Df": 0,
+      "t": 0,
+      "dp": 0,
+      "hp": 0,
+      "s": 0,
+      "shape": "cuadrada",
+      "N": 0,
+      "M": 0,
+      "V": 0,
+      "H": 0,
+      "FS": 0
+    },
+    "diseno": {
+      "zapata": {
+        "h": 0.5,
+        "varNo": 6,
+        "nbarras": 24,
+        "c1": 0.8,
+        "c2": 0.8,
+        "pedVarNo": 8,
+        "pedNH": 10,
+        "pedNV": 8,
+        "recubPed": 0.05,
+        "pedHp": 0,
+        "pedVu": 0,
+        "pedHntn": 0.5
+      },
+      "pilote": {
+        "h": 0.6,
+        "varNo": 8,
+        "nbarras": 8
+      },
+      "losa": {
+        "h": 0.4,
+        "varNo": 5,
+        "nbarras": 8,
+        "c1": 0.3,
+        "c2": 0.3,
+        "pedVarNo": 5,
+        "pedNH": 0,
+        "pedNV": 0,
+        "recubPed": 0,
+        "pedHp": 0,
+        "pedVu": 0,
+        "pedHntn": 0
+      },
+      "torre": {
+        "h": 0.5,
+        "varNo": 6,
+        "nbarras": 8,
+        "c1": 0.25,
+        "c2": 0.25,
+        "pedVarNo": 5,
+        "pedNH": 0,
+        "pedNV": 0,
+        "recubPed": 0,
+        "pedHp": 0,
+        "pedVu": 0,
+        "pedHntn": 0
+      }
+    }
+  },
+  "profile": [
+    {
+      "soil": "arcilla",
+      "from": 0,
+      "to": 2
+    },
+    {
+      "soil": "arena",
+      "from": 2,
+      "to": 6
+    },
+    {
+      "soil": "grava",
+      "from": 6,
+      "to": 10
+    }
+  ],
+  "soils": {
+    "relleno": {
+      "c": 0,
+      "phi": 0,
+      "g": 0
+    },
+    "arcilla": {
+      "c": 44.1306266548985,
+      "phi": 6,
+      "g": 15.690889477297244
+    },
+    "arena": {
+      "c": 0,
+      "phi": 25,
+      "g": 18.53486319505737
+    },
+    "grava": {
+      "c": 0,
+      "phi": 40,
+      "g": 20.49622437971952
+    }
+  }
+}

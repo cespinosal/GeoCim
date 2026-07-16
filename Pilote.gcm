@@ -1,0 +1,241 @@
+{
+  "version": "1.0",
+  "state": {
+    "module": "zapata",
+    "currentFrame": {
+      "zapata": 13,
+      "pilote": 2,
+      "losa": 0,
+      "torre": 0
+    },
+    "modDone": {
+      "zapata": true,
+      "pilote": false,
+      "losa": false,
+      "torre": false
+    },
+    "frameStatus": {
+      "zapata": [
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "pilote": [
+        "ok",
+        "ok",
+        "ok",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "losa": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "torre": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    "proyecto": {
+      "nombre": "434354",
+      "ingeniero": "Juan Espinosa",
+      "fecha": "2026-06-15",
+      "ubicacion": "Paraguay",
+      "norma": "ACI 318"
+    },
+    "config": {
+      "metodo": "meyerhof",
+      "nf": 4,
+      "unidades": "MKS"
+    },
+    "materiales": {
+      "fc": 24.516533950496214,
+      "fy": 411.87777036833637,
+      "recub": 0.07,
+      "fcLosa": 20.59388851841682,
+      "fyLosa": 411.87777036833637,
+      "fcPed": 20.59388851841682,
+      "fyPed": 411.87777036833637
+    },
+    "zapata": {
+      "B": 4,
+      "L": 4,
+      "Df": 3,
+      "N": 490.34029616553886,
+      "M": 333.43140139256644,
+      "My": 225.55653623614788,
+      "Vx": 29.42041776993233,
+      "Vy": 39.22722369324311,
+      "FS": 3,
+      "shape": "cuadrada"
+    },
+    "pilote": {
+      "D": 0.8,
+      "Lp": 10,
+      "N": 0,
+      "type": "hincado",
+      "FS": 0,
+      "pilHntn": 0
+    },
+    "torre": {
+      "Ba": 0,
+      "Bb": 0,
+      "Df": 0,
+      "t": 0,
+      "dp": 0,
+      "hp": 0,
+      "s": 0,
+      "shape": "cuadrada",
+      "N": 0,
+      "M": 0,
+      "My": 0,
+      "V": 0,
+      "Vy": 0,
+      "H": 0,
+      "FS": 0
+    },
+    "diseno": {
+      "zapata": {
+        "h": 0.6,
+        "varNo": 6,
+        "nbarras": 25,
+        "c1": 0.8,
+        "c2": 0.8,
+        "pedVarNo": 6,
+        "pedNH": 14,
+        "pedNV": 12,
+        "recubPed": 0.07,
+        "pedHp": 0,
+        "pedVu": 0,
+        "pedHntn": 0.4
+      },
+      "pilote": {
+        "h": 0.6,
+        "varNo": 8,
+        "nbarras": 0
+      },
+      "losa": {
+        "h": 0.4,
+        "varNo": 5,
+        "nbarras": 0,
+        "c1": 0.3,
+        "c2": 0.3,
+        "pedVarNo": 5,
+        "pedNH": 0,
+        "pedNV": 0,
+        "recubPed": 0,
+        "pedHp": 0,
+        "pedVu": 0,
+        "pedHntn": 0
+      },
+      "torre": {
+        "h": 0.5,
+        "varNo": 6,
+        "nbarras": 0,
+        "c1": 0.25,
+        "c2": 0.25,
+        "pedVarNo": 5,
+        "pedNH": 0,
+        "pedNV": 0,
+        "recubPed": 0,
+        "pedHp": 0,
+        "pedVu": 0,
+        "pedHntn": 0
+      }
+    }
+  },
+  "profile": [
+    {
+      "nm": "Arcilla arenosa",
+      "hatch": 5,
+      "color": "#d4b888",
+      "from": 0,
+      "to": 2,
+      "g": 15.690889477297244,
+      "c": 45.11130724722957,
+      "phi": 6
+    },
+    {
+      "nm": "Grava arenosa",
+      "hatch": 11,
+      "color": "#a89870",
+      "from": 2,
+      "to": 5,
+      "g": 17.6522506619594,
+      "c": 0,
+      "phi": 25
+    },
+    {
+      "nm": "Arena densa",
+      "hatch": 7,
+      "color": "#e3cf8a",
+      "from": 5,
+      "to": 14,
+      "g": 18.632931254290476,
+      "c": 0,
+      "phi": 30
+    }
+  ],
+  "soils": {
+    "relleno": {
+      "c": 0,
+      "phi": 0,
+      "g": 0
+    },
+    "arcilla": {
+      "c": 44.1306266548985,
+      "phi": 6,
+      "g": 15.690889477297244
+    },
+    "arena": {
+      "c": 0,
+      "phi": 25,
+      "g": 18.53486319505737
+    },
+    "grava": {
+      "c": 0,
+      "phi": 40,
+      "g": 20.49622437971952
+    }
+  }
+}

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>GeoCim — Plan de Implementación</title>
+<style>
+  :root{
+    --ink:#1b2330;--ink-soft:#5a6675;--ink-faint:#8a95a4;
+    --line:#d4dae3;--paper:#f4f6f9;--white:#fff;--blue:#1f6fd6;
+    --mono:'IBM Plex Mono',Consolas,monospace;--sans:'IBM Plex Sans',Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--ink);background:var(--paper);padding:32px}
+  .page{max-width:880px;margin:0 auto;background:var(--white);border:1px solid var(--line);border-radius:10px;padding:40px 48px}
+  .no-print{margin:0 auto 16px;max-width:880px;display:flex;justify-content:flex-end}
+  .btn{font-family:var(--sans);font-size:12.5px;font-weight:600;color:#fff;background:var(--blue);border:none;border-radius:6px;padding:8px 16px;cursor:pointer}
+  .hdr{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid var(--ink);padding-bottom:16px;margin-bottom:24px}
+  .hdr h1{font-size:21px;letter-spacing:-.01em}
+  .hdr .tag{font-size:12px;color:var(--ink-faint);margin-top:4px}
+  .hdr .meta{text-align:right;font-size:11px;color:var(--ink-faint);font-family:var(--mono)}
+  h2{font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);border-bottom:1px solid var(--line);padding-bottom:6px;margin:26px 0 12px}
+  p{font-size:13px;line-height:1.65;color:var(--ink-soft)}
+  ul{margin:8px 0 0 0;padding-left:18px}
+  li{font-size:13px;line-height:1.7;color:var(--ink-soft)}
+  .feat-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:6px}
+  .feat{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:10px 10px 12px;text-align:center}
+  .feat svg{width:48px;height:48px}
+  .feat .ft{font-size:11px;font-weight:700;color:var(--ink);margin-top:4px}
+  .feat .fd{font-size:10px;color:var(--ink-faint);line-height:1.4;margin-top:2px}
+  .icon-sm{display:inline-block;width:22px;height:22px;vertical-align:middle;margin-right:6px}
+  .icon-sm svg{width:22px;height:22px;display:block}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:6px}
+  .kpi{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:14px 12px;text-align:center}
+  .kpi .v{font-family:var(--mono);font-size:19px;font-weight:700;color:var(--ink)}
+  .kpi .l{font-size:10px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.03em;margin-top:4px}
+  table{width:100%;border-collapse:collapse;margin-top:8px;font-size:12.5px}
+  th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-faint);border-bottom:1px solid var(--line);padding:6px 8px}
+  td{padding:9px 8px;border-bottom:1px solid #eef1f6;vertical-align:top}
+  td.num,th.num{text-align:right;font-family:var(--mono)}
+  .sw{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:7px}
+  .gantt-mini{margin-top:10px}
+  .gm-row{display:flex;align-items:center;height:30px;gap:10px}
+  .gm-lbl{width:170px;font-size:11.5px;flex-shrink:0}
+  .gm-track{flex:1;position:relative;height:16px;background:var(--paper);border-radius:4px}
+  .gm-bar{position:absolute;top:0;height:16px;border-radius:4px;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;font-size:9.5px;font-family:var(--mono);color:#fff;font-weight:600}
+  .gm-axis{display:flex;margin-left:180px;font-size:9.5px;color:var(--ink-faint);font-family:var(--mono);justify-content:space-between;margin-top:4px}
+  .notes{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin-top:10px}
+  .notes li{font-size:12px;margin-bottom:4px}
+  .footer{margin-top:30px;padding-top:14px;border-top:1px solid var(--line);font-size:10.5px;color:var(--ink-faint);display:flex;justify-content:space-between}
+  @media print{
+    body{padding:0;background:#fff}
+    .no-print{display:none}
+    .page{border:none;border-radius:0;padding:0;max-width:none}
+    @page{margin:18mm}
+  }
+</style>
+</head>
+<body>
+
+<div class="no-print"><button class="btn" onclick="window.print()">Imprimir / Guardar como PDF</button></div>
+
+<div class="page">
+  <div class="hdr">
+    <div>
+      <h1>GeoCim — Plan de Implementación</h1>
+      <div class="tag">Próxima fase de desarrollo · resumen para revisión directiva</div>
+    </div>
+    <div class="meta" id="metaDate"></div>
+  </div>
+
+  <h2>Resumen del alcance</h2>
+  <div class="feat-row" id="featRow"></div>
+  <p style="margin-top:14px">Se retira el módulo de <b>Losa de cimentación</b> (de uso marginal). El módulo de <b>Pilotes</b> incorpora curvas p-y para análisis de carga lateral, y se agrega un módulo nuevo de <b>Grupo de pilotes</b>. El módulo de <b>Zapata aislada</b> se amplía para soportar, además del caso general de una columna, sistemas de torres autosoportadas de 3 y 4 piernas con zapatas independientes, el caso de piernas embebidas en un pedestal compacto, y monopolos — incluyendo las verificaciones de extracción y vuelco general del sistema, y una trabe de liga opcional entre pedestales. <b>Torre Telco</b> se extiende para soportar 4 dados además de los 3 actuales. Se agrega además un sistema transversal de <b>memoria de cálculo</b> que permite auditar paso a paso cualquier resultado, tanto geotécnico como estructural.</p>
+
+  <h2>Números clave</h2>
+  <div class="kpis" id="kpis"></div>
+
+  <h2>Fases y fechas</h2>
+  <table id="phaseTable"></table>
+
+  <h2>Cronograma por fase</h2>
+  <div class="gantt-mini" id="ganttMini"></div>
+
+  <h2>Notas y supuestos</h2>
+  <div class="notes">
+    <ul>
+      <li>No se consideran sábados, domingos ni días festivos oficiales de México (LFT art. 74).</li>
+      <li>Cada fase incluye un margen de imprevistos/cambios menores (~15% del trabajo concreto).</li>
+      <li>Estimación basada en un ritmo de <b id="hpdNote"></b> horas productivas por día, límite impuesto por restricciones de contexto/tokens por sesión de trabajo con IA — no refleja disponibilidad de tiempo del usuario.</li>
+      <li>El orden de fases (Pilotes → Grupo de pilotes → Zapata aislada → Torre Telco) fue acordado por prioridad de negocio, no por dependencia técnica estricta.</li>
+      <li>Documento generado a partir del diagrama de Gantt interactivo (<span style="font-family:var(--mono)">roadmap_gantt.html</span>), donde se puede ajustar fecha de inicio y horas/día.</li>
+    </ul>
+  </div>
+
+  <div class="footer">
+    <span>GeoCim · Suite de Cimentaciones</span>
+    <span id="genDate"></span>
+  </div>
+</div>
+
+<script>
+const ICONS={
+  losa:`<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+    <rect x="8" y="24" width="44" height="10" rx="1" fill="#c8cdd6" stroke="#8a95a4" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.65"/>
+    <circle cx="44" cy="16" r="9" fill="#d4453b"/><line x1="39" y1="16" x2="49" y2="16" stroke="white" stroke-width="2"/>
+  </svg>`,
+  zapata:`<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+    <line x1="6" y1="40" x2="54" y2="40" stroke="#1b2330" stroke-width="1.5"/>
+    <rect x="14" y="40" width="32" height="10" fill="#b9c0cb" stroke="#5a6675" stroke-width="1.5"/>
+    <rect x="25" y="14" width="10" height="26" fill="#9aa2ad" stroke="#5a6675" stroke-width="1.5"/>
+  </svg>`,
+  torre:`<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+    <line x1="4" y1="46" x2="56" y2="46" stroke="#1b2330" stroke-width="1.5"/>
+    <rect x="10" y="46" width="40" height="8" fill="#b9c0cb" stroke="#5a6675" stroke-width="1.5"/>
+    <rect x="14" y="40" width="6" height="6" fill="#4a5a6e"/><rect x="40" y="40" width="6" height="6" fill="#4a5a6e"/>
+    <polyline points="17,40 30,10 43,40" fill="none" stroke="#1b2330" stroke-width="1.6"/>
+    <line x1="22" y1="28" x2="38" y2="28" stroke="#1b2330" stroke-width="1.1"/>
+  </svg>`,
+  pilote:`<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+    <rect x="6" y="14" width="48" height="38" fill="#e8d880" opacity="0.45"/>
+    <rect x="26" y="10" width="8" height="42" fill="#9aa2ad" stroke="#5a6675" stroke-width="1.5"/>
+    <path d="M14,24 l8,3 l-8,3" fill="none" stroke="#d98a1f" stroke-width="1.6"/>
+    <path d="M46,24 l-8,3 l8,3" fill="none" stroke="#d98a1f" stroke-width="1.6"/>
+    <path d="M14,38 l8,3 l-8,3" fill="none" stroke="#d98a1f" stroke-width="1.6"/>
+    <path d="M46,38 l-8,3 l8,3" fill="none" stroke="#d98a1f" stroke-width="1.6"/>
+  </svg>`,
+  grupo:`<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+    <rect x="8" y="20" width="44" height="9" fill="#b9c0cb" stroke="#5a6675" stroke-width="1.5"/>
+    <rect x="13" y="29" width="6" height="22" fill="#9aa2ad" stroke="#5a6675" stroke-width="1.3"/>
+    <rect x="27" y="29" width="6" height="22" fill="#9aa2ad" stroke="#5a6675" stroke-width="1.3"/>
+    <rect x="41" y="29" width="6" height="22" fill="#9aa2ad" stroke="#5a6675" stroke-width="1.3"/>
+  </svg>`,
+};
+const PHASES=[
+  {name:'Fase 0 — Retirar Losa', color:'#8a95a4', icon:ICONS.losa, desc:'Quitar el módulo de Losa de cimentación de la app.', hours:2.1},
+  {name:'Fase 1 — Pilotes', color:'#d98a1f', icon:ICONS.pilote, desc:'Curvas p-y y solver de viga sobre resortes no lineales (BNWF).', hours:25.8},
+  {name:'Fase 2 — Grupo de pilotes', color:'#7a5cb8', icon:ICONS.grupo, desc:'Módulo nuevo: geometría de grupo, eficiencia, distribución de carga, cabezal.', hours:23.0},
+  {name:'Fase 3 — Zapata aislada', color:'#1f6fd6', icon:ICONS.zapata, desc:'Selector de 5 tipos de uso, diagrama de interacción P-M, trabe de liga, memoria de cálculo.', hours:74.2},
+  {name:'Fase 4 — Torre Telco', color:'#1e9e63', icon:ICONS.torre, desc:'Extender de 3 a 4 dados (geometría y checks estructurales).', hours:12.0},
+];
+const HOURS_PER_DAY=2;
+
+const MESES=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+
+function nthWeekday(year,month,weekday,n){
+  const d=new Date(year,month,1); let c=0;
+  while(true){ if(d.getDay()===weekday){ c++; if(c===n) return new Date(d); } d.setDate(d.getDate()+1); }
+}
+function holidaySet(years){
+  const s=new Set();
+  const key=d=>`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+  years.forEach(y=>{
+    s.add(key(new Date(y,0,1)));
+    s.add(key(nthWeekday(y,1,1,1)));
+    s.add(key(nthWeekday(y,2,1,3)));
+    s.add(key(new Date(y,4,1)));
+    s.add(key(new Date(y,8,16)));
+    s.add(key(nthWeekday(y,10,1,3)));
+    if((y-2024)%6===0) s.add(key(new Date(y,11,1)));
+    s.add(key(new Date(y,11,25)));
+  });
+  return s;
+}
+let HOLIDAYS;
+function isHoliday(d){ return HOLIDAYS.has(`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`); }
+function isWorkday(d){ const w=d.getDay(); return w!==0&&w!==6&&!isHoliday(d); }
+function addDays(d,n){ const r=new Date(d); r.setDate(r.getDate()+n); return r; }
+function fmt(d){ return `${String(d.getDate()).padStart(2,'0')}-${MESES[d.getMonth()]}-${d.getFullYear()}`; }
+
+function scheduleSequential(phases,startDate,hoursPerDay){
+  const years=[startDate.getFullYear()-1,startDate.getFullYear(),startDate.getFullYear()+1,startDate.getFullYear()+2];
+  HOLIDAYS=holidaySet(years);
+  let cursor=new Date(startDate);
+  while(!isWorkday(cursor)) cursor=addDays(cursor,1);
+  return phases.map(p=>{
+    let remain=hoursPerDay, left=p.hours;
+    const start=new Date(cursor);
+    while(true){
+      const consume=Math.min(remain,left);
+      remain-=consume; left-=consume;
+      if(left<=1e-9){ const end=new Date(cursor); cursor=addDays(cursor,1); while(!isWorkday(cursor)) cursor=addDays(cursor,1); return {...p,start,end}; }
+      cursor=addDays(cursor,1); while(!isWorkday(cursor)) cursor=addDays(cursor,1); remain=hoursPerDay;
+    }
+  });
+}
+
+const today=new Date(); today.setHours(0,0,0,0);
+const startDate=addDays(today,1);
+const scheduled=scheduleSequential(PHASES,startDate,HOURS_PER_DAY);
+const totalHours=PHASES.reduce((a,p)=>a+p.hours,0);
+const firstDate=scheduled[0].start, lastDate=scheduled[scheduled.length-1].end;
+let workdays=0; for(let d=new Date(firstDate); d<=lastDate; d=addDays(d,1)) if(isWorkday(d)) workdays++;
+const calDays=Math.round((lastDate-firstDate)/86400000)+1;
+
+document.getElementById('metaDate').innerHTML=`Generado: ${fmt(today)}<br>Versión 1.0`;
+document.getElementById('genDate').textContent=`Generado el ${fmt(today)}`;
+document.getElementById('hpdNote').textContent=HOURS_PER_DAY;
+
+document.getElementById('featRow').innerHTML=PHASES.map(p=>`
+  <div class="feat">${p.icon}<div class="ft">${p.name.replace(/^Fase \d+ — /,'')}</div><div class="fd">${p.desc}</div></div>
+`).join('');
+
+document.getElementById('kpis').innerHTML=`
+  <div class="kpi"><div class="v">${totalHours.toFixed(0)} h</div><div class="l">Horas totales</div></div>
+  <div class="kpi"><div class="v">${fmt(firstDate)}</div><div class="l">Inicio</div></div>
+  <div class="kpi"><div class="v">${fmt(lastDate)}</div><div class="l">Término estimado</div></div>
+  <div class="kpi"><div class="v">${workdays} días</div><div class="l">Días laborables</div></div>
+`;
+
+document.getElementById('phaseTable').innerHTML=`
+  <tr><th>Fase</th><th>Alcance</th><th class="num">Horas</th><th>Inicio</th><th>Fin</th><th class="num">Duración</th></tr>
+  ${scheduled.map(p=>{
+    const dur=Math.round((p.end-p.start)/86400000)+1;
+    return `<tr>
+      <td style="white-space:nowrap"><span class="icon-sm">${p.icon}</span>${p.name}</td>
+      <td>${p.desc}</td>
+      <td class="num">${p.hours.toFixed(1)} h</td>
+      <td>${fmt(p.start)}</td>
+      <td>${fmt(p.end)}</td>
+      <td class="num">${dur} d</td>
+    </tr>`;
+  }).join('')}
+  <tr><td colspan="2"><b>Total</b></td><td class="num"><b>${totalHours.toFixed(1)} h</b></td><td colspan="2"></td><td class="num"><b>${calDays} d</b></td></tr>
+`;
+
+// mini gantt (phase-level, proportional to calendar days)
+const ganttHtml=scheduled.map(p=>{
+  const offsetDays=Math.round((p.start-firstDate)/86400000);
+  const spanDays=Math.round((p.end-p.start)/86400000)+1;
+  const leftPct=offsetDays/calDays*100, widthPct=spanDays/calDays*100;
+  return `<div class="gm-row">
+    <div class="gm-lbl">${p.name.replace(/^Fase \d+ — /,'')}</div>
+    <div class="gm-track"><div class="gm-bar" style="left:${leftPct}%;width:${widthPct}%;background:${p.color}">${p.hours.toFixed(0)}h</div></div>
+  </div>`;
+}).join('');
+document.getElementById('ganttMini').innerHTML=ganttHtml+
+  `<div class="gm-axis"><span>${fmt(firstDate)}</span><span>${fmt(lastDate)}</span></div>`;
+</script>
+</body>
+</html>

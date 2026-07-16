@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>GeoCim — Configuraciones de cimentación</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',Arial,sans-serif;background:#f4f6f9;overflow:hidden}
+  canvas{display:block}
+  #legend{position:absolute;top:14px;left:14px;background:rgba(255,255,255,0.94);border:1px solid #d4dae3;border-radius:8px;padding:12px 16px;font-size:12.5px;color:#1b2330;max-width:340px;line-height:1.6}
+  #legend b{display:block;font-size:13px;margin-bottom:6px}
+  #legend .it{display:flex;gap:8px;margin-bottom:3px}
+  #legend .n{font-weight:700;color:#1f6fd6;min-width:16px}
+  #hint{position:absolute;bottom:12px;left:14px;font-size:11px;color:#8a95a4;background:rgba(255,255,255,0.85);padding:4px 9px;border-radius:5px}
+</style>
+</head>
+<body>
+<div id="legend">
+  <b>Configuraciones a soportar</b>
+  <div class="it"><span class="n">1</span><span>Zapata aislada — uso general (1 columna)</span></div>
+  <div class="it"><span class="n">2</span><span>Torre 3 piernas — 3 zapatas independientes</span></div>
+  <div class="it"><span class="n">3</span><span>Torre 4 piernas — 4 zapatas independientes</span></div>
+  <div class="it"><span class="n">4</span><span>Torre 4 piernas embebida en 1 pedestal (2×2 m, apertura 1.6 m)</span></div>
+  <div class="it"><span class="n">5</span><span>Monopolo — 1 cimentación, 1 fuste</span></div>
+</div>
+<div id="hint">Arrastra: rotar · rueda: zoom · click derecho: desplazar</div>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(window.innerWidth,window.innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setClearColor(0xf4f6f9);
+document.body.appendChild(renderer.domElement);
+
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,0.1,300);
+camera.position.set(32,22,46);
+
+scene.add(new THREE.AmbientLight(0xffffff,0.8));
+const dl=new THREE.DirectionalLight(0xffffff,0.6); dl.position.set(10,20,10); scene.add(dl);
+const dl2=new THREE.DirectionalLight(0xffffff,0.3); dl2.position.set(-10,8,-10); scene.add(dl2);
+
+const controls=new THREE.OrbitControls(camera,renderer.domElement);
+controls.enableDamping=true; controls.dampingFactor=0.08; controls.screenSpacePanning=true;
+controls.target.set(28,3,0);
+
+const matFoot=new THREE.MeshPhongMaterial({color:0x4a5a6e,specular:0x667788,shininess:40});
+const matLeg =new THREE.LineBasicMaterial({color:0x1b2330,linewidth:1});
+const matShaft=new THREE.MeshPhongMaterial({color:0x3a4a5e,specular:0x556677,shininess:50});
+const edgeMat=new THREE.LineBasicMaterial({color:0x1b2330,transparent:true,opacity:0.85});
+
+function addEdged(mesh,geo){ scene.add(mesh); const ed=new THREE.LineSegments(new THREE.EdgesGeometry(geo),edgeMat); ed.position.copy(mesh.position); ed.rotation.copy(mesh.rotation); scene.add(ed); }
+
+function footing(cx,cz,B,h,topY){
+  const g=new THREE.BoxGeometry(B,h,B);
+  const m=new THREE.Mesh(g,matFoot); m.position.set(cx,topY-h/2,cz); addEdged(m,g);
+  return m;
+}
+function stub(cx,cz,size,y0,h){
+  const g=new THREE.BoxGeometry(size,h,size);
+  const m=new THREE.Mesh(g,matFoot); m.position.set(cx,y0+h/2,cz); addEdged(m,g);
+  return {top:y0+h};
+}
+function legLine(x0,z0,y0,xT,zT,yT){
+  const pts=[new THREE.Vector3(x0,y0,z0),new THREE.Vector3(xT,yT,zT)];
+  scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),matLeg));
+}
+function braceRing(positions,y){
+  for(let i=0;i<positions.length;i++){
+    const a=positions[i],b=positions[(i+1)%positions.length];
+    const pts=[new THREE.Vector3(a[0],y,a[1]),new THREE.Vector3(b[0],y,b[1])];
+    scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),matLeg));
+  }
+}
+function legPositions(n,r,cx,cz){
+  const angles = n===3?[90,210,330]:[45,135,225,315];
+  return angles.map(a=>{const rad=a*Math.PI/180; return [cx+r*Math.cos(rad), cz+r*Math.sin(rad)];});
+}
+function makeTower(cx,cz,n,r,apexH){
+  const pos=legPositions(n,r,cx,cz);
+  const tops=pos.map(p=>{
+    footing(p[0],p[1],1.4,0.4,0);
+    const st=stub(p[0],p[1],0.4,0,1.2);
+    return st.top;
+  });
+  const apex=[cx,cz];
+  pos.forEach((p,i)=>legLine(p[0],p[1],tops[i],apex[0],apex[1],apexH));
+  braceRing(pos,tops[0]+ (apexH-tops[0])*0.35);
+  braceRing(pos,tops[0]+ (apexH-tops[0])*0.7);
+  return pos;
+}
+
+const grid=new THREE.GridHelper(70,35,0x1b2330,0xd4dae3); grid.position.set(28,0.01,0); scene.add(grid);
+
+function label(text,x,y,z){
+  const cnv=document.createElement('canvas'); cnv.width=512; cnv.height=96;
+  const ctx=cnv.getContext('2d');
+  ctx.fillStyle='rgba(255,255,255,0.92)'; ctx.fillRect(0,0,512,96);
+  ctx.strokeStyle='#1f6fd6'; ctx.lineWidth=4; ctx.strokeRect(2,2,508,92);
+  ctx.fillStyle='#1b2330'; ctx.font='bold 30px Arial'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(text,256,48);
+  const tex=new THREE.CanvasTexture(cnv);
+  const mat=new THREE.SpriteMaterial({map:tex});
+  const sp=new THREE.Sprite(mat); sp.position.set(x,y,z); sp.scale.set(6,1.1,1);
+  scene.add(sp);
+}
+
+/* 1 — Zapata aislada genérica */
+(function(){
+  const cx=0;
+  footing(cx,0,2,0.4,0);
+  stub(cx,0,0.3,0,2.5);
+  label('1 · Zapata aislada',cx,5.5,0);
+})();
+
+/* 2 — Torre 3 piernas, 3 zapatas independientes */
+(function(){
+  const cx=14;
+  makeTower(cx,0,3,3.2,8);
+  label('2 · Torre 3 piernas',cx,9.2,0);
+})();
+
+/* 3 — Torre 4 piernas, 4 zapatas independientes */
+(function(){
+  const cx=28;
+  makeTower(cx,0,4,3.2,8);
+  label('3 · Torre 4 piernas',cx,9.2,0);
+})();
+
+/* 4 — Torre 4 piernas embebida en 1 pedestal 2x2m, apertura 1.6m */
+(function(){
+  const cx=42;
+  footing(cx,0,3,0.5,0);
+  const ped=new THREE.BoxGeometry(2,1.0,2);
+  const pedM=new THREE.Mesh(ped,matFoot); pedM.position.set(cx,0.5,0); addEdged(pedM,ped);
+  const half=0.8;
+  const pos=[[cx-half,-half],[cx+half,-half],[cx-half,half],[cx+half,half]];
+  const tops=pos.map(p=>{
+    const g=new THREE.BoxGeometry(0.18,1.6,0.18);
+    const m=new THREE.Mesh(g,matShaft); m.position.set(p[0],0.8,p[1]); addEdged(m,g);
+    return 1.6;
+  });
+  pos.forEach((p,i)=>legLine(p[0],p[1],tops[i],cx,0,8));
+  braceRing(pos,tops[0]+(8-tops[0])*0.4);
+  label('4 · Torre embebida en pedestal',cx,9.2,0);
+})();
+
+/* 5 — Monopolo */
+(function(){
+  const cx=58;
+  footing(cx,0,2.6,0.5,0);
+  const colG=new THREE.BoxGeometry(0.5,1.0,0.5);
+  const colM=new THREE.Mesh(colG,matFoot); colM.position.set(cx,0.5,0); addEdged(colM,colG);
+  const shaftG=new THREE.CylinderGeometry(0.32,0.32,8,24);
+  const shaftM=new THREE.Mesh(shaftG,matShaft); shaftM.position.set(cx,5,0); addEdged(shaftM,shaftG);
+  label('5 · Monopolo',cx,9.7,0);
+})();
+
+(function loop(){
+  controls.update();
+  renderer.render(scene,camera);
+  requestAnimationFrame(loop);
+})();
+
+window.addEventListener('resize',()=>{
+  camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+================================================================================
+ROL
+================================================================================
+
+Actúa como el ingeniero de software senior que construyó el proyecto
+GoeCim: una WEB multinorma de revisión de cimentaciones.
+Conoces la arquitectura y vas a EXTENDERLA a una aplicación Desk. Yo soy ingeniero civil: necesito
+que se cree la aplicación respetando el canvas del HTML que te estoy dando.
+
+
+================================================================================
+CONTEXTO
+================================================================================
+
+La app FUNCIONA solo como una máscara para presentación de mis superiores.
+
+REGLA DE ORO: NO toques ui. Si necesitas cambiar
+la interfaz o la arquitectura está mal, debes decírmelo antes.
+
+
+================================================================================
+TAREA
+================================================================================
+
+1. Crea los archivos .py necesarios
+
+2. Solo me interesa lo visual en esta sesión, por lo que iremos trabajando en el
+desarrollo después.
+
+3. Crear una sección de cimentación para torres de telecomunicaciones (Zapatada con 3 dados)
+
+REQUISITOS:
+  - Mismo estilo que el html
+
+================================================================================
+FORMATO DE RESPUESTA
+================================================================================
+
+1. Entrégame un .exe funcional con los aspectos del hmtl.
+2. Usaremos casos de estudio del libro "Fundamentos de Ingeniería de Cimentacion"
+de Braja.
