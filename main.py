@@ -2,6 +2,7 @@
 GeoCim — Suite de Cimentaciones
 Entrada principal de la aplicación.
 """
+import os
 import sys
 import traceback
 
@@ -23,6 +24,14 @@ def _exception_hook(exc_type, exc_value, exc_tb):
     sys.__excepthook__(exc_type, exc_value, exc_tb)
 
 
+def _open_path_from_args():
+    """Ruta de un .gcm/.json pasado por línea de comandos (doble clic en Explorer)."""
+    for arg in sys.argv[1:]:
+        if arg.lower().endswith((".gcm", ".json")) and os.path.isfile(arg):
+            return arg
+    return None
+
+
 def main():
     sys.excepthook = _exception_hook
 
@@ -42,7 +51,7 @@ def main():
     splash.show()
     app.processEvents()
 
-    ventana = VentanaPrincipal(splash=splash)
+    ventana = VentanaPrincipal(splash=splash, open_path=_open_path_from_args())
 
     sys.exit(app.exec())
 

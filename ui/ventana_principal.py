@@ -39,9 +39,10 @@ def _make_app_icon() -> QIcon:
 
 
 class VentanaPrincipal(QMainWindow):
-    def __init__(self, splash=None):
+    def __init__(self, splash=None, open_path=None):
         super().__init__()
         self._splash = splash
+        self._open_path = open_path
         self._load_done = False
         self._close_confirmed = False   # True cuando ya se resolvió el diálogo de cierre
 
@@ -83,7 +84,18 @@ class VentanaPrincipal(QMainWindow):
         self.setCentralWidget(self.browser)
 
     def _on_load_finished(self, _ok: bool):
+        if self._open_path:
+            self._load_project_file()
         QTimer.singleShot(350, self._open_window)
+
+    def _load_project_file(self):
+        """Carga un .gcm/.json pasado por línea de comandos (doble clic en Explorer)."""
+        try:
+            with open(self._open_path, "r", encoding="utf-8") as f:
+                data = f.read()
+        except OSError:
+            return
+        self.browser.page().runJavaScript(f"loadJsonString({_json.dumps(data)})")
 
     def _open_window(self):
         if self._load_done:
