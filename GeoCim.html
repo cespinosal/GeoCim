@@ -1611,13 +1611,15 @@ const state = {
     torre:        ['','','','','','','','','','','','','',''],
   },
   proyecto: {
-    nombre:    '',
-    ingeniero: '',
-    fecha:     '',
-    ubicacion: '',
-    norma:     'NMX-C-401',
+    assetNumber: '',
+    assetName:   '',
+    solicitud:   '',
+    ingeniero:   '',
+    fecha:       '',
+    ubicacion:   '',
+    norma:       'NMX-C-401',
   },
-  config: { metodo:'vesic', nf:null, unidades:'MKS' },
+  config: { metodo:'vesic', nf:null, unidades:'MKS', autosave:true, autosaveMin:5 },
   materiales: { fc:0, fy:0, recub:0, fcLosa:0, fyLosa:0, fcPed:0, fyPed:0 },
   zapata: { B:0, L:0, Df:0, N:0, M:0, My:0, Vx:0, Vy:0, FS:0, shape:'cuadrada' },
   pilote: { D:0, Lp:0, N:0, type:'hincado', FS:0, pilHntn:0 },
@@ -1806,7 +1808,7 @@ function validateFrame(mod, idx){
 
   if(lbl==='Proyecto'){
     const p=state.proyecto;
-    return p.nombre.trim()!==''&&p.ingeniero.trim()!==''&&p.fecha.trim()!==''&&p.ubicacion.trim()!=='';
+    return p.assetNumber.trim()!==''&&p.ingeniero.trim()!==''&&p.fecha.trim()!==''&&p.ubicacion.trim()!=='';
   }
 
   if(lbl==='Configuración'){
@@ -1961,7 +1963,9 @@ function fProyecto(){
   const p=state.proyecto;
   return ipSec('Datos del proyecto','M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2')+
   `<div class="ip-body">
-    ${txtField('Nombre del proyecto','nombre',p.nombre,`state.proyecto.nombre=this.value;renderCalc()`)}
+    ${txtField('Asset Number','assetnum',p.assetNumber,`state.proyecto.assetNumber=this.value;renderCalc()`)}
+    ${txtField('Asset Name','assetname',p.assetName,`state.proyecto.assetName=this.value;renderCalc()`)}
+    ${txtField('Solicitud','solicitud',p.solicitud,`state.proyecto.solicitud=this.value;renderCalc()`)}
     ${txtField('Ingeniero responsable','ing',p.ingeniero,`state.proyecto.ingeniero=this.value;renderCalc()`)}
     <div class="field"><label>Fecha</label>
       <div class="inwrap"><input type="date" style="font-family:var(--sans)" value="${p.fecha}" oninput="state.proyecto.fecha=this.value;renderCalc()"></div></div>
@@ -2055,7 +2059,25 @@ function fConfig(){
           value="${state.materiales.fyPed>0?matD(state.materiales.fyPed):''}"
           oninput="state.materiales.fyPed=matSI(parseFloat(this.value)||0);renderCalc()"><span class="unit">${matLbl()}</span></div></div>
       <div class="note-box" style="margin-top:4px;color:var(--ink-faint)">Si se omite f'c,ped usa el f'c de la cimentación. ACI 318-19.</div>
-    </div>`);
+    </div>`)+
+  ipSec('Guardado automático','M12 2v6m0 8v6m-9-9h6m6 0h6M5.6 5.6l4.2 4.2m4.4 4.4l4.2 4.2M5.6 18.4l4.2-4.2m4.4-4.4l4.2-4.2')+
+  `<div class="ip-body">
+    <div class="field"><label>Autoguardado del archivo (.gcm)</label>
+      <div class="seg">
+        <button class="${c.autosave?'on':''}" onclick="state.config.autosave=true;renderCalc()">Activado</button>
+        <button class="${!c.autosave?'on':''}" onclick="state.config.autosave=false;renderCalc()">Desactivado</button>
+      </div>
+    </div>
+    <div class="field"><label>Frecuencia</label>
+      <div class="seg">
+        <button class="${c.autosaveMin===1?'on':''}" onclick="state.config.autosaveMin=1;renderCalc()">1 min</button>
+        <button class="${c.autosaveMin===2?'on':''}" onclick="state.config.autosaveMin=2;renderCalc()">2 min</button>
+        <button class="${c.autosaveMin===5?'on':''}" onclick="state.config.autosaveMin=5;renderCalc()">5 min</button>
+        <button class="${c.autosaveMin===10?'on':''}" onclick="state.config.autosaveMin=10;renderCalc()">10 min</button>
+      </div>
+    </div>
+    <div class="note-box" style="margin-top:4px;color:var(--ink-faint)">Guarda sobre el mismo archivo .gcm después del primer "Guardar" manual. Si el proyecto nunca se ha guardado a disco, el autoguardado no tiene ruta y permanece inactivo.</div>
+  </div>`;
 }
 
 /* ---- frames estructurales ---- */
@@ -4035,7 +4057,7 @@ function buildVerifyBadge(mod){
 function drawProyectoCard(){
   const p=state.proyecto;
   const svg=document.getElementById('scene');
-  const cx=400, cy=240, w=500, h=260;
+  const cx=400, cy=260, w=500, h=340;
   let s=buildDefs();
   s+=`<rect x="${cx-w/2}" y="${cy-h/2}" width="${w}" height="${h}" rx="12" fill="white" stroke="#d4dae3" stroke-width="1.5" filter="url(#sh)"/>`;
   s+=`<rect x="${cx-w/2}" y="${cy-h/2}" width="${w}" height="52" rx="12" fill="#1b2330"/>`;
@@ -4058,11 +4080,11 @@ function drawProyectoCard(){
   s+=`<text x="${cx-w/2+56}" y="${cy-h/2+25}" font-family="Archivo" font-size="14" font-weight="800" fill="white">GeoCim</text>`;
   s+=`<text x="${cx-w/2+56}" y="${cy-h/2+39}" font-family="IBM Plex Mono" font-size="9" fill="#8b97a8" letter-spacing="1.5">SUITE DE CIMENTACIONES</text>`;
   const rows=[
-    ['Proyecto',p.nombre],['Ingeniero',p.ingeniero],
-    ['Fecha',p.fecha],['Ubicación',p.ubicacion],['Norma',p.norma],
+    ['Asset Number',p.assetNumber],['Asset Name',p.assetName],['Solicitud',p.solicitud],
+    ['Ingeniero',p.ingeniero],['Fecha',p.fecha],['Ubicación',p.ubicacion],['Norma',p.norma],
   ];
   rows.forEach(([k,v],i)=>{
-    const rx=cx-w/2+24, ry=cy-h/2+88+i*34;
+    const rx=cx-w/2+24, ry=cy-h/2+88+i*32;
     s+=`<text x="${rx}" y="${ry}" font-family="IBM Plex Sans" font-size="10" fill="#8a95a4">${k.toUpperCase()}</text>`;
     s+=`<text x="${rx}" y="${ry+16}" font-family="IBM Plex Sans" font-size="13" font-weight="500" fill="#1b2330">${v||'—'}</text>`;
     if(i<rows.length-1) s+=`<line x1="${rx}" y1="${ry+24}" x2="${cx+w/2-24}" y2="${ry+24}" stroke="#e7ebf1" stroke-width="1"/>`;
@@ -4290,7 +4312,7 @@ function menuGuardar(){
   const blob=new Blob([data],{type:'application/json'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
-  const nombre=(state.proyecto.nombre||'proyecto').replace(/\s+/g,'_');
+  const nombre=(state.proyecto.assetNumber||state.proyecto.assetName||'proyecto').replace(/\s+/g,'_');
   a.href=url; a.download=`${nombre}.gcm`;
   document.body.appendChild(a);
   a.click();
@@ -4352,6 +4374,18 @@ function saveState(){
     Object.entries(SOILS).forEach(([k,v])=>{ sd[k]={c:v.c,phi:v.phi,g:v.g}; });
     localStorage.setItem('gcm_so', JSON.stringify(sd));
   }catch(e){}
+}
+/* ---------------------------------------------------------------
+   AUTOGUARDADO — invocado periódicamente por el shell PySide6
+--------------------------------------------------------------- */
+let _lastAutosaveTs=Date.now();
+function _autosaveCheck(){
+  const c=state.config;
+  if(!c.autosave) return null;
+  const intervalMs=(c.autosaveMin||5)*60000;
+  if(Date.now()-_lastAutosaveTs<intervalMs) return null;
+  _lastAutosaveTs=Date.now();
+  return menuGuardarData();
 }
 function loadState(){
   try{

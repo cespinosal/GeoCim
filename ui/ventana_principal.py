@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 import json as _json
 
 from PySide6.QtWidgets import QMainWindow, QLabel, QMessageBox, QFileDialog
@@ -45,6 +46,7 @@ class VentanaPrincipal(QMainWindow):
         self._open_path = open_path
         self._load_done = False
         self._close_confirmed = False   # True cuando ya se resolvió el diálogo de cierre
+        self._current_path = open_path  # ruta del .gcm en disco (None si nunca se ha guardado)
 
         self.setWindowTitle("GeoCim · Suite de Cimentaciones")
         self.setWindowIcon(_make_app_icon())
@@ -52,6 +54,7 @@ class VentanaPrincipal(QMainWindow):
         self._restore_geometry()
         self._setup_webview()
         self._setup_statusbar()
+        self._setup_autosave()
 
         QTimer.singleShot(10_000, self._open_window)
 
@@ -127,8 +130,35 @@ class VentanaPrincipal(QMainWindow):
             download.setDownloadDirectory(os.path.dirname(path) or ".")
             download.setDownloadFileName(os.path.basename(path))
             download.accept()
+            self._current_path = path
         else:
             download.cancel()
+
+    # ------------------------------------------------------------------
+    # Autoguardado — pregunta a la página cada cierto tiempo si toca guardar
+    # (el intervalo y el on/off los decide el JS según state.config.autosave)
+    # ------------------------------------------------------------------
+    def _setup_autosave(self):
+        self._autosave_timer = QTimer(self)
+        self._autosave_timer.timeout.connect(self._autosave_tick)
+        self._autosave_timer.start(30_000)  # sondeo cada 30s; el JS decide si ya toca
+
+    def _autosave_tick(self):
+        if not self._load_done:
+            return
+        self.browser.page().runJavaScript("_autosaveCheck()", self._on_autosave_result)
+
+    def _on_autosave_result(self, json_data):
+        if not json_data or not self._current_path:
+            return
+        try:
+            with open(self._current_path, "w", encoding="utf-8") as f:
+                f.write(json_data)
+        except OSError:
+            return
+        self.statusBar().showMessage(
+            f"Autoguardado · {time.strftime('%H:%M:%S')}", 4000
+        )
 
     # ------------------------------------------------------------------
     # Cierre de ventana — preguntar si guardar
@@ -180,9 +210,8 @@ class VentanaPrincipal(QMainWindow):
             nombre = "proyecto"
             try:
                 d = _json.loads(json_data)
-                nombre = (
-                    d.get("state", {}).get("proyecto", {}).get("nombre", "") or "proyecto"
-                )
+                proyecto = d.get("state", {}).get("proyecto", {})
+                nombre = proyecto.get("assetNumber") or proyecto.get("assetName") or "proyecto"
             except Exception:
                 pass
             nombre = nombre.replace(" ", "_").replace("/", "-") + ".gcm"
@@ -196,6 +225,7 @@ class VentanaPrincipal(QMainWindow):
             if path:
                 with open(path, "w", encoding="utf-8") as f:
                     f.write(json_data)
+                self._current_path = path
                 saved = True
 
         if saved:
